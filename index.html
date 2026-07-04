@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Wayfarer - your holiday companion</title>
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Wayfarer" />
+<meta name="theme-color" content="#0c1220" />
+<link rel="apple-touch-icon" href="apple-touch-icon.png" />
+<link rel="manifest" href="manifest.json" />
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Outfit:wght@300;400;500;600;700&display=swap');
+
+* { box-sizing: border-box; margin: 0; }
+html, body { background: #0c1220; }
+body { padding-top: env(safe-area-inset-top); }
+.app { min-height: 100vh; background: #0c1220; color: #eef0f6; font-family: 'Outfit', sans-serif; }
+em { font-style: italic; }
+
+.brand { font-weight: 700; letter-spacing: 0.4em; font-size: 12px; color: #f5a524; }
+.brand.light { color: #ffd98a; }
+
+.center { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding: 24px; text-align: center; }
+.building .big-em { font-family: 'Fraunces', serif; font-size: clamp(34px, 7vw, 64px); font-weight: 500; }
+.bmsg { color: #ffd98a; font-size: 15px; min-height: 22px; }
+
+.spin { width: 34px; height: 34px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.15); border-top-color: #f5a524; animation: rot 0.9s linear infinite; flex: 0 0 auto; }
+@keyframes rot { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .spin { animation-duration: 2.5s; } }
+
+.wiz { max-width: 640px; margin: 0 auto; padding: 48px 20px 80px; }
+.wiz-h { font-family: 'Fraunces', serif; font-weight: 400; font-size: clamp(32px, 6vw, 52px); margin: 14px 0 14px; }
+.wiz-h em { color: #f5a524; }
+.lede { color: rgba(255,255,255,0.75); font-size: 16px; line-height: 1.5; margin-bottom: 24px; }
+
+.modes { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.mode { position: relative; text-align: left; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.16); border-radius: 18px; padding: 22px 18px; color: #eef0f6; cursor: pointer; font-family: 'Outfit', sans-serif; display: flex; flex-direction: column; gap: 8px; }
+.mode:hover { border-color: #f5a524; }
+.mode-ico { font-size: 26px; }
+.mode-t { font-family: 'Fraunces', serif; font-size: 21px; }
+.mode-d { font-size: 13px; color: rgba(255,255,255,0.7); line-height: 1.45; }
+.mode-tag { position: absolute; top: 12px; right: 12px; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; background: #f5a524; color: #17120a; padding: 4px 9px; border-radius: 999px; font-weight: 700; }
+
+.steps { display: flex; gap: 8px; margin-bottom: 26px; flex-wrap: wrap; }
+.stp { font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; padding: 6px 12px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.18); color: rgba(255,255,255,0.5); background: transparent; cursor: pointer; font-family: 'Outfit', sans-serif; }
+.stp.on { border-color: #f5a524; color: #f5a524; }
+.stp.done { color: #6fc3c9; border-color: rgba(111,195,201,0.5); }
+.found { background: rgba(245,165,36,0.12); border: 1px solid rgba(245,165,36,0.45); border-radius: 12px; padding: 12px 16px; font-size: 14px; margin-bottom: 18px; line-height: 1.45; }
+
+.panel { display: flex; flex-direction: column; gap: 14px; }
+.lbl { font-size: 13px; text-transform: uppercase; letter-spacing: 0.12em; color: rgba(255,255,255,0.65); margin-top: 6px; }
+.opt { text-transform: none; letter-spacing: 0; color: rgba(255,255,255,0.4); }
+.inp { width: 100%; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.16); color: #fff; border-radius: 12px; padding: 14px 16px; font-size: 16px; font-family: 'Outfit', sans-serif; }
+.inp:focus { outline: 2px solid #f5a524; outline-offset: 1px; }
+.dumparea { resize: vertical; line-height: 1.5; margin-bottom: 12px; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.18); color: #eef0f6; padding: 9px 15px; border-radius: 999px; font-size: 14px; cursor: pointer; font-family: 'Outfit', sans-serif; }
+.chip.on { background: #f5a524; border-color: #f5a524; color: #17120a; font-weight: 600; }
+.wiz-nav { display: flex; gap: 12px; margin-top: 30px; justify-content: flex-end; flex-wrap: wrap; }
+.cta { background: #f5a524; color: #17120a; border: none; padding: 14px 26px; border-radius: 999px; font-size: 16px; font-weight: 700; cursor: pointer; font-family: 'Outfit', sans-serif; }
+.cta:disabled { opacity: 0.4; cursor: not-allowed; }
+.ghost { background: transparent; border: 1px solid rgba(255,255,255,0.3); color: #eef0f6; padding: 12px 20px; border-radius: 999px; font-size: 14px; cursor: pointer; font-family: 'Outfit', sans-serif; }
+.ghost.sm { padding: 6px 14px; font-size: 13px; }
+.err { background: rgba(220,80,80,0.15); border: 1px solid rgba(220,80,80,0.5); border-radius: 12px; padding: 12px 16px; font-size: 14px; margin: 10px 0; line-height: 1.5; word-break: break-word; }
+
+.filezone { border: 1.5px dashed rgba(255,255,255,0.3); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; font-size: 14px; color: rgba(255,255,255,0.75); }
+.filelist { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.filepill { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); border-radius: 999px; padding: 5px 6px 5px 12px; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; }
+.filepill .x { background: transparent; border: none; color: rgba(255,255,255,0.6); cursor: pointer; font-size: 12px; }
+
+.hero { padding: 54px 20px 40px; }
+.hero-inner { max-width: 860px; margin: 0 auto; }
+.dest { font-family: 'Fraunces', serif; font-weight: 450; font-size: clamp(42px, 9vw, 88px); line-height: 1.02; margin: 12px 0 10px; }
+.sub { font-size: 14px; letter-spacing: 0.06em; color: rgba(255,255,255,0.75); }
+.sum { margin-top: 14px; font-size: 16px; max-width: 560px; color: rgba(255,255,255,0.9); line-height: 1.5; }
+
+.strip { display: flex; gap: 2px; overflow-x: auto; padding: 14px 16px; background: #0c1220; position: sticky; top: 0; z-index: 5; }
+.stub { flex: 0 0 auto; background: rgba(255,255,255,0.05); border: 1px dashed rgba(255,255,255,0.25); border-radius: 10px; padding: 10px 16px; color: #eef0f6; cursor: pointer; text-align: left; font-family: 'Outfit', sans-serif; }
+.stub-day { display: block; font-size: 10px; letter-spacing: 0.2em; color: rgba(255,255,255,0.55); }
+.stub-date { font-size: 14px; font-weight: 600; }
+.stub.on { background: #f5a524; border-style: solid; border-color: #f5a524; color: #17120a; }
+.stub.on .stub-day { color: rgba(23,18,10,0.6); }
+.stub.today:not(.on) { border-color: #6fc3c9; }
+.live { display: block; font-size: 9px; letter-spacing: 0.15em; color: #6fc3c9; }
+.stub.on .live { color: #17120a; }
+
+.daywrap { padding: 34px 20px 44px; }
+.daywrap section, .dayhead, .tipbox, .dayload, .daywrap > .err, .daywrap > .ghost { max-width: 860px; margin-left: auto; margin-right: auto; }
+.dayhead { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; margin-bottom: 26px; }
+.eyebrow { font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.7); }
+.daytitle { font-family: 'Fraunces', serif; font-weight: 500; font-size: clamp(28px, 5vw, 44px); margin: 6px 0 4px; }
+.dayfocus { color: rgba(255,255,255,0.8); font-size: 15px; }
+.wx { background: rgba(0,0,0,0.28); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.18); border-radius: 16px; padding: 14px 18px; text-align: center; min-width: 130px; }
+.wx-ico { font-size: 28px; }
+.wx-t { font-size: 22px; font-weight: 700; } .wx-t span { font-weight: 400; color: rgba(255,255,255,0.6); font-size: 15px; }
+.wx-s { font-size: 12px; color: rgba(255,255,255,0.75); margin-top: 2px; }
+
+.sec { font-size: 13px; text-transform: uppercase; letter-spacing: 0.2em; color: #ffd98a; margin: 26px 0 12px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.pcard { background: rgba(0,0,0,0.3); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.14); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 6px; }
+.slot { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #6fc3c9; }
+.pname { font-family: 'Fraunces', serif; font-size: 19px; font-weight: 550; }
+.badges { display: flex; flex-wrap: wrap; gap: 6px; }
+.badge { font-size: 11px; letter-spacing: 0.04em; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 999px; padding: 3px 9px; }
+.eff-easy { background: rgba(111,195,201,0.18); border-color: rgba(111,195,201,0.5); }
+.eff-moderate { background: rgba(245,165,36,0.18); border-color: rgba(245,165,36,0.5); }
+.eff-hard { background: rgba(220,80,80,0.2); border-color: rgba(220,80,80,0.55); }
+.pdetail { font-size: 12.5px; color: #ffd98a; border-left: 2px solid rgba(255,217,138,0.5); padding-left: 9px; line-height: 1.4; }
+.addbtn { margin-top: 8px; background: rgba(111,195,201,0.15); border: 1px solid rgba(111,195,201,0.5); color: #bfeef1; padding: 9px 14px; border-radius: 999px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'Outfit', sans-serif; }
+.slotpick { margin-top: 8px; display: flex; flex-wrap: wrap; align-items: center; gap: 7px; font-size: 12.5px; color: rgba(255,255,255,0.75); }
+.grid.opts { margin-top: 14px; }
+.pdesc { font-size: 14px; color: rgba(255,255,255,0.82); line-height: 1.45; flex: 1; }
+.prow { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+.lnk { font-size: 13px; text-decoration: none; color: #ffd98a; border: 1px solid rgba(255,217,138,0.4); padding: 6px 12px; border-radius: 999px; }
+.lnk-p { background: #f5a524; color: #17120a; border-color: #f5a524; font-weight: 600; }
+.tipbox { background: rgba(111,195,201,0.12); border: 1px solid rgba(111,195,201,0.4); border-radius: 14px; padding: 14px 18px; font-size: 14px; margin: 22px auto; line-height: 1.5; }
+.dayload { display: flex; align-items: center; gap: 14px; padding: 30px 0; color: rgba(255,255,255,0.85); }
+
+.foot { max-width: 860px; margin: 0 auto; padding: 26px 20px 60px; display: flex; flex-direction: column; gap: 18px; }
+.vault { border: 1px solid rgba(255,255,255,0.16); border-radius: 16px; overflow: hidden; }
+.vault-h { width: 100%; text-align: left; background: rgba(255,255,255,0.05); border: none; color: #eef0f6; padding: 14px 18px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: 'Outfit', sans-serif; }
+.vault-b { padding: 6px 18px 14px; }
+.vrow { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px dashed rgba(255,255,255,0.12); font-size: 14px; }
+.vrow span { color: rgba(255,255,255,0.6); }
+.vrow strong { font-family: monospace; letter-spacing: 0.05em; }
+.vrow.muted { color: rgba(255,255,255,0.45); border: none; }
+.tips { display: flex; flex-direction: column; gap: 6px; }
+.tipline { font-size: 13px; color: rgba(255,255,255,0.7); }
+.keynote { font-size: 13px; color: rgba(255,255,255,0.6); line-height: 1.5; }
+.keynote a { color: #ffd98a; }
+
+@media (max-width: 520px) { .two { grid-template-columns: 1fr; } .dayhead { flex-direction: column; } .modes { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useRef } = React;
+
+/*
+  WAYFARER standalone - runs anywhere (GitHub Pages friendly).
+  Uses your own Anthropic API key, stored only in this browser.
+*/
+
+const INTERESTS = [
+  "Food & drink", "History & culture", "Nature & walks", "Shopping",
+  "Museums & art", "Local markets", "Nightlife", "Family-friendly",
+  "Dog-friendly", "Beaches & lakes", "Adventure", "Relaxation",
+];
+const PACES = ["Gentle", "Balanced", "Packed"];
+const BUILD_MESSAGES = [
+  "Studying the map…",
+  "Checking what's on while you're there…",
+  "Finding the places locals actually go…",
+  "Sketching your days…",
+  "Folding it all into your dashboard…",
+];
+
+// ---------- helpers ----------
+const uid = () => Math.random().toString(36).slice(2, 9);
+const mapsLink = (q) => "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(q);
+function fmtDate(iso) {
+  try { return new Date(iso + "T12:00:00").toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" }); }
+  catch { return iso; }
+}
+function fmtDateLong(iso) {
+  try { return new Date(iso + "T12:00:00").toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" }); }
+  catch { return iso; }
+}
+function todayISO() {
+  const d = new Date(); const p = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+function datesBetween(start, end) {
+  const out = []; let d = new Date(start + "T12:00:00"); const e = new Date(end + "T12:00:00"); let g = 0;
+  while (d <= e && g < 60) {
+    const p = (n) => String(n).padStart(2, "0");
+    out.push(`${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`);
+    d.setDate(d.getDate() + 1); g++;
+  }
+  return out;
+}
+function repairJSON(s) {
+  let out = "", stack = [], inStr = false, esc = false;
+  for (const ch of s) {
+    out += ch;
+    if (inStr) {
+      if (esc) esc = false;
+      else if (ch === "\\") esc = true;
+      else if (ch === '"') inStr = false;
+      continue;
+    }
+    if (ch === '"') inStr = true;
+    else if (ch === "{") stack.push("}");
+    else if (ch === "[") stack.push("]");
+    else if (ch === "}" || ch === "]") stack.pop();
+  }
+  if (inStr) out += '"';
+  out = out.replace(/,\s*$/, "");
+  while (stack.length) out += stack.pop();
+  out = out.replace(/,(\s*[}\]])/g, "$1");
+  return out;
+}
+function extractJSON(text) {
+  const c = text.replace(/```json/gi, "").replace(/```/g, "");
+  const s = c.indexOf("{");
+  if (s === -1) throw new Error("No JSON found in response");
+  const e = c.lastIndexOf("}");
+  const raw = c.slice(s, e === -1 ? c.length : e + 1);
+  try { return JSON.parse(raw); }
+  catch { return JSON.parse(repairJSON(c.slice(s))); }
+}
+
+// ---------- API (your own key) ----------
+const MODELS = ["claude-sonnet-4-6", "claude-sonnet-4-5", "claude-3-7-sonnet-20250219"];
+let modelIdx = 0;
+const getKey = () => localStorage.getItem("wayfarer-key") || "";
+
+async function askClaudeOnce(content, useSearch, maxTokens) {
+  const key = getKey();
+  if (!key) throw new Error("NO_KEY");
+  const body = {
+    model: MODELS[modelIdx],
+    max_tokens: maxTokens,
+    messages: [{ role: "user", content }],
+  };
+  if (useSearch) body.tools = [{ type: "web_search_20250305", name: "web_search" }];
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": key,
+      "anthropic-version": "2023-06-01",
+      "anthropic-dangerous-direct-browser-access": "true",
+    },
+    body: JSON.stringify(body),
+  });
+  const rawText = await res.text();
+  let data;
+  try { data = JSON.parse(rawText); }
+  catch { throw new Error("HTTP " + res.status + " · non-JSON reply: " + rawText.slice(0, 140)); }
+  if (data.error) {
+    const msg = typeof data.error === "string" ? data.error : (data.error.message || JSON.stringify(data.error).slice(0, 160));
+    if (/model/i.test(msg) && modelIdx < MODELS.length - 1) { modelIdx++; return askClaudeOnce(content, useSearch, maxTokens); }
+    throw new Error("HTTP " + res.status + " · " + msg + (useSearch ? " [with search]" : " [no search]"));
+  }
+  const text = (data.content || []).filter((b) => b.type === "text").map((b) => b.text).join("\n");
+  return extractJSON(text);
+}
+
+async function askClaude(content, useSearch, maxTokens = 3000) {
+  try {
+    return await askClaudeOnce(content, useSearch, maxTokens);
+  } catch (e1) {
+    if (e1.message === "NO_KEY") throw e1;
+    await new Promise((r) => setTimeout(r, 700));
+    try {
+      return await askClaudeOnce(content, useSearch, maxTokens);
+    } catch (e2) {
+      if (useSearch) return await askClaudeOnce(content, false, maxTokens);
+      throw e2;
+    }
+  }
+}
+
+function readFileB64(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result.split(",")[1]);
+    r.onerror = () => rej(new Error("Couldn't read " + file.name));
+    r.readAsDataURL(file);
+  });
+}
+function readFileText(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result);
+    r.onerror = () => rej(new Error("Couldn't read " + file.name));
+    r.readAsText(file);
+  });
+}
+
+// ---------- storage (localStorage on this device) ----------
+const KEY = "wayfarer-trip";
+async function loadTrip() {
+  try { const v = localStorage.getItem(KEY); return v ? JSON.parse(v) : null; } catch { return null; }
+}
+async function saveTrip(t) { try { localStorage.setItem(KEY, JSON.stringify(t)); } catch (e) { console.error(e); } }
+async function clearTrip() { try { localStorage.removeItem(KEY); } catch {} }
+
+// ---------- theme ----------
+const THEME_GRADIENTS = {
+  city: "linear-gradient(160deg,#1a2647 0%,#3d2f5e 55%,#8a4b6b 100%)",
+  mountains: "linear-gradient(160deg,#0f2233 0%,#2a4a5e 55%,#7fa8b8 100%)",
+  coast: "linear-gradient(160deg,#0b2a3d 0%,#155e75 55%,#f2b263 100%)",
+  countryside: "linear-gradient(160deg,#16301f 0%,#3a5a35 55%,#c9a34e 100%)",
+  lakes: "linear-gradient(160deg,#0d2438 0%,#1f5568 55%,#6fc3c9 100%)",
+  night: "linear-gradient(160deg,#120f2b 0%,#332a5c 55%,#f5a524 100%)",
+  default: "linear-gradient(160deg,#101a30 0%,#2c3a5c 55%,#c98a5a 100%)",
+};
+const themeBg = (t) => THEME_GRADIENTS[(t || "").toLowerCase()] || THEME_GRADIENTS.default;
+const WEATHER_ICONS = { sun: "☀️", partcloud: "⛅", cloud: "☁️", rain: "🌧️", storm: "⛈️", snow: "❄️", fog: "🌫️", wind: "💨" };
+
+// ---------- prompts ----------
+function dumpPrompt(pastedText, extraTextFiles) {
+  return `You are a travel admin assistant. The traveller has dumped everything they have about an upcoming holiday: pasted notes, confirmation emails, booking documents and photos/PDFs (attached).
+
+PASTED TEXT:
+"""
+${pastedText || "(none)"}
+"""
+${extraTextFiles ? "ATTACHED TEXT FILES:\n" + extraTextFiles : ""}
+
+Extract everything useful. Respond with ONLY valid JSON, no markdown, exactly:
+{
+ "destination": "main destination, or empty string",
+ "start": "YYYY-MM-DD or empty string",
+ "end": "YYYY-MM-DD or empty string",
+ "travel": "how they're getting there incl. flight/ferry/train numbers, or empty string",
+ "bookings": [{"label":"what it is, e.g. Hotel Belvedere","ref":"booking reference"}],
+ "interests": [pick only from this exact list where evidence supports it: ${JSON.stringify(INTERESTS)}],
+ "notes": "anything else useful the planner should know (travellers, dog, must-dos, dietary needs) in one or two sentences",
+ "found": "one friendly sentence summarising what you managed to pull out"
+}
+If dates are ambiguous, make your best sensible guess. Empty strings/arrays where nothing was found. Compact JSON only.`;
+}
+
+function overviewPrompt(form) {
+  const dates = datesBetween(form.start, form.end);
+  return `You are a brilliant local travel planner. Plan a trip overview.
+
+Destination: ${form.destination}
+Dates: ${form.start} to ${form.end} (${dates.length} days)
+Getting there: ${form.travel || "not specified"}
+Traveller interests: ${form.interests.join(", ") || "general sightseeing"}
+Pace: ${form.pace}
+Extra notes: ${form.notes || "none"}
+
+Use at most ONE quick web search to check seasonal context, then answer immediately.
+
+Respond with ONLY valid JSON, no markdown, no preamble, exactly this shape:
+{
+ "destination": "clean display name",
+ "country": "country",
+ "currency": "e.g. CHF",
+ "summary": "2 warm sentences, personalised to the interests",
+ "heroTheme": "one of: city, mountains, coast, countryside, lakes, night",
+ "tips": ["3 short practical tips for this destination at this time of year"],
+ "days": [one ARRAY per date of exactly 3 strings: ["short evocative title","theme: city|mountains|coast|countryside|lakes|night","5-8 word focus for the day"]]
+}
+The "days" array must have exactly ${dates.length} entries, one per date in this order: ${dates.join(", ")}. Arrival and departure days lighter. Keep every string SHORT. Compact JSON only, no spaces after commas.`;
+}
+
+function dayPrompt(trip, day) {
+  return `You are a brilliant local travel guide in ${trip.destination}, ${trip.country}.
+Plan ${day.date} (${fmtDateLong(day.date)}) in detail. Day title: "${day.title}". Focus: ${day.focus}.
+Traveller interests: ${trip.form.interests.join(", ")}. Pace: ${trip.form.pace}. Notes: ${trip.form.notes || "none"}.
+
+Use at most TWO quick web searches: one for the weather forecast in ${trip.destination} on ${day.date} (use typical conditions if too far out), then answer immediately from your knowledge. Prefer well-loved local spots over tourist traps.
+
+Respond with ONLY valid JSON, no markdown. Compact format, arrays in fixed order:
+{
+ "w": ["5-8 word weather summary", highC number, lowC number, "icon: sun|partcloud|cloud|rain|storm|snow|fog|wind"],
+ "s": [3 arrays for Morning, Afternoon, Evening in order, each: ["name","one enticing sentence","duration e.g. ≈2 hrs","website url or null","Google Maps search text"]],
+ "e": [2 arrays, places to eat: ["name","one sentence mentioning a dish","url or null","maps search text"]],
+ "p": [2 arrays, shops/essentials: ["name","one sentence","url or null","maps search text"]],
+ "t": "one insider tip for this specific day"
+}
+Keep every string SHORT. Compact JSON only, no spaces after commas.`;
+}
+
+function libraryPrompt(trip, category) {
+  return `You are a brilliant local expert in ${trip.destination}, ${trip.country}.
+The traveller's trip runs ${trip.days[0].date} to ${trip.days[trip.days.length - 1].date}. Their notes: ${trip.form.notes || "none"}.
+
+Build a generous menu of "${category}" options in and around ${trip.destination}. Use at most TWO quick web searches for anything you're unsure about, then answer immediately from your knowledge.
+
+Requirements:
+- AT LEAST 10 options, ideally 12. Range from famous must-dos to lesser-known local gems.
+- Be specific. For walks/hikes: distance, elevation gain, terrain, route type, views. For food: signature dishes and vibe. For museums/culture: what's inside. And so on.
+
+Respond with ONLY valid JSON, no markdown. To keep it compact, each option is an ARRAY of 8 values in this exact order:
+[name, one enticing sentence, specifics e.g. "9 km loop · 420 m climb · lake views", duration e.g. "≈3 hrs", effort ("Easy"/"Moderate"/"Hard" or null), best time ("Morning"/"Afternoon"/"Evening"/"Any"), website url or null, Google Maps search text]
+
+Exact shape:
+{"o":[["Harder Kulm","Sunset panorama over both lakes","Funicular up · 25 min walk at top","≈2 hrs","Easy","Evening","https://...","Harder Kulm Interlaken"], ...]}
+Keep every string SHORT. Compact JSON only, no spaces after commas.`;
+}
+
+// ---------- UI atoms ----------
+function LinkBtn({ href, children, primary }) {
+  if (!href) return null;
+  return (
+    <a href={href} target="_blank" rel="noopener noreferrer"
+      className={"lnk " + (primary ? "lnk-p" : "")} onClick={(e) => e.stopPropagation()}>
+      {children}
+    </a>
+  );
+}
+
+function PlaceCard({ item, city, slot }) {
+  const q = item.mapsQuery || `${item.name} ${city}`;
+  return (
+    <div className="pcard">
+      {slot && <div className="slot">{slot}</div>}
+      <div className="pname">{item.name}</div>
+      {(item.duration || item.effort) && (
+        <div className="badges">
+          {item.duration && <span className="badge">⏱ {item.duration}</span>}
+          {item.effort && <span className={"badge eff-" + String(item.effort).toLowerCase()}>{item.effort}</span>}
+        </div>
+      )}
+      <div className="pdesc">{item.desc}</div>
+      {item.detail && <div className="pdetail">{item.detail}</div>}
+      <div className="prow">
+        {item.url && <LinkBtn href={item.url}>Website ↗</LinkBtn>}
+        <LinkBtn href={mapsLink(q)} primary>Take me there →</LinkBtn>
+      </div>
+    </div>
+  );
+}
+
+// ---------- main app ----------
+function Wayfarer() {
+  const [screen, setScreen] = useState("loading"); // loading | key | home | dump | wizard | building | dash
+  const [step, setStep] = useState(0);
+  const [form, setForm] = useState({
+    destination: "", start: "", end: "", travel: "",
+    bookings: [{ id: uid(), label: "", ref: "" }],
+    interests: [], pace: "Balanced", notes: "",
+  });
+  const [keyInput, setKeyInput] = useState("");
+  const [dumpText, setDumpText] = useState("");
+  const [dumpFiles, setDumpFiles] = useState([]);
+  const [dumping, setDumping] = useState(false);
+  const [foundMsg, setFoundMsg] = useState("");
+  const [trip, setTrip] = useState(null);
+  const [dayIdx, setDayIdx] = useState(0);
+  const [buildMsg, setBuildMsg] = useState(0);
+  const [error, setError] = useState(null);
+  const [dayLoading, setDayLoading] = useState(false);
+  const [vaultOpen, setVaultOpen] = useState(false);
+  const [libCat, setLibCat] = useState(null);
+  const [libLoading, setLibLoading] = useState(false);
+  const [pickerFor, setPickerFor] = useState(null);
+  const fileRef = useRef(null);
+
+  const setF = (patch) => setForm((f) => ({ ...f, ...patch }));
+
+  async function runDiag() {
+    setError("Running connection test…");
+    try {
+      await askClaudeOnce("Respond with ONLY this JSON: {\"ok\":true}", false, 1000);
+      setError("✓ Connection works. Try building again.");
+    } catch (e) {
+      if (e.message === "NO_KEY") { setScreen("key"); setError(null); return; }
+      setError("✗ " + e.message);
+    }
+  }
+
+  // restore saved trip
+  useEffect(() => {
+    (async () => {
+      if (!getKey()) { setScreen("key"); return; }
+      const saved = await loadTrip();
+      if (saved && saved.days) {
+        setTrip(saved);
+        const i = saved.days.findIndex((d) => d.date === todayISO());
+        setDayIdx(i >= 0 ? i : 0);
+        setScreen("dash");
+      } else setScreen("home");
+    })();
+  }, []);
+
+  useEffect(() => {
+    if (screen !== "building") return;
+    const t = setInterval(() => setBuildMsg((m) => (m + 1) % BUILD_MESSAGES.length), 2600);
+    return () => clearInterval(t);
+  }, [screen]);
+
+  // lazy-load day detail
+  useEffect(() => {
+    if (screen !== "dash" || !trip) return;
+    const day = trip.days[dayIdx];
+    if (day && !day.detail && !dayLoading) fetchDay(dayIdx);
+  }, [screen, dayIdx, trip]);
+
+  // auto-open the first interest category in the options library
+  useEffect(() => {
+    if (screen !== "dash" || !trip || libCat) return;
+    const first = (trip.form.interests || [])[0];
+    if (first) { setLibCat(first); fetchLibrary(first); }
+  }, [screen, trip]);
+
+  // ---------- actions ----------
+  function saveKey() {
+    const k = keyInput.trim();
+    if (!k) return;
+    localStorage.setItem("wayfarer-key", k);
+    setKeyInput("");
+    setError(null);
+    setScreen(trip ? "dash" : "home");
+  }
+
+  function addFiles(list) {
+    const arr = Array.from(list || []).slice(0, 6 - dumpFiles.length);
+    setDumpFiles((f) => [...f, ...arr]);
+  }
+
+  async function runDump() {
+    if (!dumpText.trim() && dumpFiles.length === 0) return;
+    setDumping(true); setError(null);
+    try {
+      const blocks = [];
+      let textFileContents = "";
+      for (const f of dumpFiles) {
+        if (f.type === "application/pdf") {
+          const b64 = await readFileB64(f);
+          blocks.push({ type: "document", source: { type: "base64", media_type: "application/pdf", data: b64 } });
+        } else if (f.type.startsWith("image/")) {
+          const b64 = await readFileB64(f);
+          blocks.push({ type: "image", source: { type: "base64", media_type: f.type, data: b64 } });
+        } else {
+          const txt = await readFileText(f);
+          textFileContents += `--- ${f.name} ---\n${txt.slice(0, 6000)}\n`;
+        }
+      }
+      blocks.push({ type: "text", text: dumpPrompt(dumpText, textFileContents) });
+      const out = await askClaude(blocks, false, 2000);
+      setForm((f) => ({
+        ...f,
+        destination: out.destination || f.destination,
+        start: out.start || f.start,
+        end: out.end || f.end,
+        travel: out.travel || f.travel,
+        bookings: (out.bookings && out.bookings.length)
+          ? out.bookings.map((b) => ({ id: uid(), label: b.label || "", ref: b.ref || "" }))
+          : f.bookings,
+        interests: (out.interests && out.interests.length) ? out.interests.filter((i) => INTERESTS.includes(i)) : f.interests,
+        notes: out.notes || f.notes,
+      }));
+      setFoundMsg(out.found || "Pulled out what I could - check it over below.");
+      setStep(0);
+      setScreen("wizard");
+    } catch (e) {
+      if (e.message === "NO_KEY") { setScreen("key"); return; }
+      setError("Couldn't make sense of that dump: " + e.message);
+    } finally {
+      setDumping(false);
+    }
+  }
+
+  async function buildTrip() {
+    setScreen("building"); setError(null);
+    try {
+      const ov = await askClaude(overviewPrompt(form), true);
+      const dates = datesBetween(form.start, form.end);
+      const rows = Array.isArray(ov.days) ? ov.days : [];
+      const days = dates.map((date, i) => {
+        const r = Array.isArray(rows[i]) ? rows[i] : [];
+        return {
+          date,
+          title: r[0] || "Day " + (i + 1),
+          theme: r[1] || ov.heroTheme || "default",
+          focus: r[2] || "",
+          detail: null,
+        };
+      });
+      const newTrip = { ...ov, form, days, library: {}, builtAt: todayISO() };
+      setTrip(newTrip);
+      await saveTrip(newTrip);
+      const i = days.findIndex((d) => d.date === todayISO());
+      setDayIdx(i >= 0 ? i : 0);
+      setScreen("dash");
+    } catch (e) {
+      if (e.message === "NO_KEY") { setScreen("key"); return; }
+      setError("The planner hit a snag: " + e.message);
+      setScreen("wizard");
+    }
+  }
+
+  async function fetchDay(idx, force = false) {
+    if (!trip) return;
+    const day = trip.days[idx];
+    if (day.detail && !force) return;
+    setDayLoading(true); setError(null);
+    try {
+      const raw = await askClaude(dayPrompt(trip, day), true);
+      const SLOTS = ["Morning", "Afternoon", "Evening"];
+      const detail = {
+        weather: Array.isArray(raw.w)
+          ? { summary: raw.w[0], highC: raw.w[1], lowC: raw.w[2], icon: raw.w[3] }
+          : raw.weather || null,
+        schedule: (raw.s || raw.schedule || []).map((r, i) =>
+          Array.isArray(r)
+            ? { slot: SLOTS[i] || "Later", name: r[0], desc: r[1], duration: r[2], url: r[3], mapsQuery: r[4] }
+            : r),
+        eat: (raw.e || raw.eat || []).map((r) =>
+          Array.isArray(r) ? { name: r[0], desc: r[1], url: r[2], mapsQuery: r[3] } : r),
+        shops: (raw.p || raw.shops || []).map((r) =>
+          Array.isArray(r) ? { name: r[0], desc: r[1], url: r[2], mapsQuery: r[3] } : r),
+        tip: raw.t || raw.tip || "",
+      };
+      const updated = { ...trip, days: trip.days.map((d, i) => (i === idx ? { ...d, detail } : d)) };
+      setTrip(updated);
+      await saveTrip(updated);
+    } catch (e) {
+      if (e.message === "NO_KEY") { setScreen("key"); return; }
+      setError("Couldn't load this day - tap retry. (" + e.message + ")");
+    } finally {
+      setDayLoading(false);
+    }
+  }
+
+  async function fetchLibrary(cat, force = false) {
+    if (!trip) return;
+    const lib = trip.library || {};
+    if (lib[cat] && !force) return;
+    setLibLoading(true);
+    try {
+      const raw = await askClaude(libraryPrompt(trip, cat), true);
+      const options = (raw.o || raw.options || []).map((r) =>
+        Array.isArray(r)
+          ? { name: r[0], desc: r[1], detail: r[2], duration: r[3], effort: r[4], bestTime: r[5], url: r[6], mapsQuery: r[7] }
+          : r
+      ).filter((o) => o && o.name);
+      setTrip((t) => {
+        const updated = { ...t, library: { ...(t.library || {}), [cat]: options } };
+        saveTrip(updated);
+        return updated;
+      });
+    } catch (e) {
+      if (e.message === "NO_KEY") { setScreen("key"); return; }
+      setError("Couldn't load " + cat + " options - tap the category again to retry.");
+    } finally {
+      setLibLoading(false);
+    }
+  }
+
+  async function addToDay(option, slot) {
+    setTrip((t) => {
+      const days = t.days.map((d, i) => {
+        if (i !== dayIdx || !d.detail) return d;
+        const item = { slot, name: option.name, desc: option.desc, detail: option.detail, duration: option.duration, effort: option.effort, url: option.url, mapsQuery: option.mapsQuery };
+        const sched = (d.detail.schedule || []).some((s) => s.slot === slot)
+          ? d.detail.schedule.map((s) => (s.slot === slot ? item : s))
+          : [...(d.detail.schedule || []), item];
+        const order = { Morning: 0, Afternoon: 1, Evening: 2 };
+        sched.sort((a, b) => (order[a.slot] ?? 9) - (order[b.slot] ?? 9));
+        return { ...d, detail: { ...d.detail, schedule: sched } };
+      });
+      const updated = { ...t, days };
+      saveTrip(updated);
+      return updated;
+    });
+    setPickerFor(null);
+  }
+
+  async function startFresh() {
+    await clearTrip();
+    setTrip(null);
+    setForm({ destination: "", start: "", end: "", travel: "", bookings: [{ id: uid(), label: "", ref: "" }], interests: [], pace: "Balanced", notes: "" });
+    setDumpText(""); setDumpFiles([]); setFoundMsg(""); setStep(0);
+    setLibCat(null); setPickerFor(null);
+    setScreen("home");
+  }
+
+  // ---------- render: API key ----------
+  function renderKey() {
+    return (
+      <div className="wiz">
+        <div className="brand">WAYFARER</div>
+        <h1 className="wiz-h">One-time <em>setup</em></h1>
+        <p className="lede">Wayfarer plans your trips with Claude AI. It needs your own Anthropic API key - entered once, stored only on this device, never sent anywhere except directly to Anthropic.</p>
+        {error && <div className="err">{error}</div>}
+        <div className="panel">
+          <label className="lbl">Your Anthropic API key</label>
+          <input className="inp" type="password" placeholder="sk-ant-…"
+            value={keyInput} onChange={(e) => setKeyInput(e.target.value)} />
+          <div className="keynote">
+            Get one at <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener noreferrer">console.anthropic.com → API keys</a>. You'll need a small amount of API credit on the account (a whole trip typically costs pennies). Keep the key private - anyone with it can use your credit.
+          </div>
+        </div>
+        <div className="wiz-nav">
+          <button className="cta" disabled={!keyInput.trim()} onClick={saveKey}>Save & continue ✦</button>
+        </div>
+      </div>
+    );
+  }
+
+  // ---------- render: home ----------
+  function renderHome() {
+    return (
+      <div className="wiz">
+        <div className="brand">WAYFARER</div>
+        <h1 className="wiz-h">Let's plan your <em>escape</em></h1>
+        <p className="lede">Give it everything you've got and it builds your whole trip into a live day-by-day dashboard.</p>
+        <div className="modes">
+          <button className="mode" onClick={() => setScreen("dump")}>
+            <div className="mode-ico">🗑️✨</div>
+            <div className="mode-t">Holiday dump</div>
+            <div className="mode-d">Paste your emails and notes, upload booking PDFs and screenshots - it sorts the lot.</div>
+            <div className="mode-tag">Recommended</div>
+          </button>
+          <button className="mode" onClick={() => { setStep(0); setScreen("wizard"); }}>
+            <div className="mode-ico">✍️</div>
+            <div className="mode-t">Step by step</div>
+            <div className="mode-d">Answer a few quick questions and fill it in yourself.</div>
+          </button>
+        </div>
+        <div className="wiz-nav">
+          <button className="ghost sm" onClick={() => setScreen("key")}>⚙ API key</button>
+        </div>
+      </div>
+    );
+  }
+
+  // ---------- render: dump ----------
+  function renderDump() {
+    return (
+      <div className="wiz">
+        <div className="brand">WAYFARER</div>
+        <h1 className="wiz-h">Give me <em>everything</em> you've got</h1>
+        <p className="lede">Confirmation emails, booking refs, half-written notes, screenshots, PDFs - dump it all here and I'll pull out the trip.</p>
+        {error && <div className="err">{error}</div>}
+        <textarea className="inp dumparea" rows={9}
+          placeholder={"Paste anything…\n\ne.g. Flying to Nice 14-21 Aug, EZY8221, hotel booking ref HX-99201, hire car with Sixt ref 4451, want good seafood and a day in Monaco…"}
+          value={dumpText} onChange={(e) => setDumpText(e.target.value)} />
+        <div className="filezone"
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => { e.preventDefault(); addFiles(e.dataTransfer.files); }}>
+          <div>📎 Drop booking PDFs, screenshots or emails here</div>
+          <button className="ghost sm" onClick={() => fileRef.current && fileRef.current.click()}>Choose files</button>
+          <input ref={fileRef} type="file" multiple hidden
+            accept=".pdf,.txt,.eml,.md,image/*"
+            onChange={(e) => { addFiles(e.target.files); e.target.value = ""; }} />
+          {dumpFiles.length > 0 && (
+            <div className="filelist">
+              {dumpFiles.map((f, i) => (
+                <span className="filepill" key={i}>
+                  {f.name}
+                  <button className="x" onClick={() => setDumpFiles(dumpFiles.filter((_, j) => j !== i))}>✕</button>
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+        <div className="wiz-nav">
+          <button className="ghost" onClick={() => setScreen("home")}>← Back</button>
+          <button className="cta" disabled={dumping || (!dumpText.trim() && dumpFiles.length === 0)} onClick={runDump}>
+            {dumping ? "Sorting it all out…" : "Sort this lot out ✦"}
+          </button>
+        </div>
+        {dumping && <div className="dayload"><div className="spin" /><div>Reading everything and pulling out the details…</div></div>}
+      </div>
+    );
+  }
+
+  // ---------- render: wizard ----------
+  function renderWizard() {
+    const canNext =
+      (step === 0 && form.destination.trim() && form.start && form.end && form.end >= form.start) ||
+      step === 1 ||
+      (step === 2 && form.interests.length > 0);
+
+    return (
+      <div className="wiz">
+        <div className="brand">WAYFARER</div>
+        <h1 className="wiz-h">Nearly <em>there</em></h1>
+        {foundMsg && <div className="found">✨ {foundMsg}</div>}
+        <div className="steps">
+          {["Where & when", "Getting there", "Make it yours"].map((s, i) => (
+            <button key={s} className={"stp " + (i === step ? "on" : i < step ? "done" : "")} onClick={() => setStep(i)}>{s}</button>
+          ))}
+        </div>
+
+        {error && (
+          <div className="err">
+            {error}
+            <div style={{ marginTop: 8 }}>
+              <button className="ghost sm" onClick={runDiag}>Run connection test</button>
+            </div>
+          </div>
+        )}
+
+        {step === 0 && (
+          <div className="panel">
+            <label className="lbl">Where are you off to?</label>
+            <input className="inp" placeholder="e.g. Interlaken, Switzerland"
+              value={form.destination} onChange={(e) => setF({ destination: e.target.value })} />
+            <div className="two">
+              <div>
+                <label className="lbl">First day</label>
+                <input type="date" className="inp" value={form.start} onChange={(e) => setF({ start: e.target.value })} />
+              </div>
+              <div>
+                <label className="lbl">Last day</label>
+                <input type="date" className="inp" value={form.end} onChange={(e) => setF({ end: e.target.value })} />
+              </div>
+            </div>
+            <button className="ghost sm" onClick={() => setScreen("dump")}>🗑️✨ Or dump it all instead</button>
+          </div>
+        )}
+
+        {step === 1 && (
+          <div className="panel">
+            <label className="lbl">How are you getting there?</label>
+            <input className="inp" placeholder="e.g. Campervan via Eurotunnel, or flight BA714"
+              value={form.travel} onChange={(e) => setF({ travel: e.target.value })} />
+            <label className="lbl">Booking references <span className="opt">(kept in your Booking Vault)</span></label>
+            {form.bookings.map((b, i) => (
+              <div className="two" key={b.id}>
+                <input className="inp" placeholder="What is it? e.g. Hotel Belvedere" value={b.label}
+                  onChange={(e) => {
+                    const bs = form.bookings.map((x, j) => (j === i ? { ...x, label: e.target.value } : x));
+                    setF({ bookings: bs });
+                  }} />
+                <input className="inp" placeholder="Reference" value={b.ref}
+                  onChange={(e) => {
+                    const bs = form.bookings.map((x, j) => (j === i ? { ...x, ref: e.target.value } : x));
+                    setF({ bookings: bs });
+                  }} />
+              </div>
+            ))}
+            <button className="ghost" onClick={() => setF({ bookings: [...form.bookings, { id: uid(), label: "", ref: "" }] })}>
+              + Add another booking
+            </button>
+          </div>
+        )}
+
+        {step === 2 && (
+          <div className="panel">
+            <label className="lbl">What do you love on holiday? <span className="opt">(pick a few)</span></label>
+            <div className="chips">
+              {INTERESTS.map((it) => (
+                <button key={it} className={"chip " + (form.interests.includes(it) ? "on" : "")}
+                  onClick={() => setF({
+                    interests: form.interests.includes(it)
+                      ? form.interests.filter((x) => x !== it)
+                      : [...form.interests, it],
+                  })}>{it}</button>
+              ))}
+            </div>
+            <label className="lbl">Your pace</label>
+            <div className="chips">
+              {PACES.map((p) => (
+                <button key={p} className={"chip " + (form.pace === p ? "on" : "")} onClick={() => setF({ pace: p })}>{p}</button>
+              ))}
+            </div>
+            <label className="lbl">Anything else we should know? <span className="opt">(optional)</span></label>
+            <input className="inp" placeholder="e.g. travelling with our dog, love a good viewpoint"
+              value={form.notes} onChange={(e) => setF({ notes: e.target.value })} />
+          </div>
+        )}
+
+        <div className="wiz-nav">
+          {step > 0 ? <button className="ghost" onClick={() => setStep(step - 1)}>← Back</button>
+            : <button className="ghost" onClick={() => setScreen("home")}>← Start</button>}
+          {step < 2 && <button className="cta" disabled={!canNext} onClick={() => setStep(step + 1)}>Continue →</button>}
+          {step === 2 && <button className="cta" disabled={!canNext || !form.destination || !form.start || !form.end} onClick={buildTrip}>Build my trip ✦</button>}
+        </div>
+      </div>
+    );
+  }
+
+  // ---------- render: dashboard ----------
+  function renderDash() {
+    const day = trip.days[dayIdx];
+    const isToday = day.date === todayISO();
+    const det = day.detail;
+    const bookings = (trip.form.bookings || []).filter((b) => b.label || b.ref);
+
+    return (
+      <div className="dash">
+        <header className="hero" style={{ background: themeBg(trip.heroTheme) }}>
+          <div className="hero-inner">
+            <div className="brand light">WAYFARER</div>
+            <h1 className="dest"><em>{trip.destination}</em></h1>
+            <div className="sub">{fmtDate(trip.days[0].date)} – {fmtDate(trip.days[trip.days.length - 1].date)} · {trip.country} · {trip.currency}</div>
+            <p className="sum">{trip.summary}</p>
+          </div>
+        </header>
+
+        <nav className="strip" aria-label="Days">
+          {trip.days.map((d, i) => (
+            <button key={d.date}
+              className={"stub " + (i === dayIdx ? "on" : "") + (d.date === todayISO() ? " today" : "")}
+              onClick={() => setDayIdx(i)}>
+              <span className="stub-day">DAY {i + 1}</span>
+              <span className="stub-date">{fmtDate(d.date)}</span>
+              {d.date === todayISO() && <span className="live">● LIVE</span>}
+            </button>
+          ))}
+        </nav>
+
+        <main className="daywrap" style={{ background: themeBg(day.theme) }}>
+          <div className="dayhead">
+            <div>
+              <div className="eyebrow">{fmtDateLong(day.date)}{isToday ? " · Today" : ""}</div>
+              <h2 className="daytitle">{day.title}</h2>
+              <div className="dayfocus">{day.focus}</div>
+            </div>
+            {det && det.weather && (
+              <div className="wx">
+                <div className="wx-ico">{WEATHER_ICONS[det.weather.icon] || "🌤️"}</div>
+                <div className="wx-t">{det.weather.highC}° <span>/ {det.weather.lowC}°</span></div>
+                <div className="wx-s">{det.weather.summary}</div>
+              </div>
+            )}
+          </div>
+
+          {error && (
+            <div className="err">{error} <button className="ghost sm" onClick={() => fetchDay(dayIdx, true)}>Retry</button></div>
+          )}
+
+          {dayLoading && !det && (
+            <div className="dayload"><div className="spin" /><div>Planning {fmtDate(day.date)} just for you…</div></div>
+          )}
+
+          {det && (
+            <React.Fragment>
+              <section>
+                <h3 className="sec">Your day</h3>
+                <div className="grid">
+                  {(det.schedule || []).map((s, i) => <PlaceCard key={i} item={s} slot={s.slot} city={trip.destination} />)}
+                </div>
+              </section>
+
+              <section>
+                <h3 className="sec">Your options · pick one and slot it in</h3>
+                <div className="chips">
+                  {(trip.form.interests || []).map((cat) => (
+                    <button key={cat} className={"chip " + (libCat === cat ? "on" : "")}
+                      onClick={() => { setLibCat(cat); fetchLibrary(cat); }}>{cat}</button>
+                  ))}
+                </div>
+                {libLoading && (
+                  <div className="dayload"><div className="spin" /><div>Hunting down the best {libCat ? libCat.toLowerCase() : "options"} in {trip.destination}…</div></div>
+                )}
+                {!libLoading && libCat && ((trip.library || {})[libCat] || []).length > 0 && (
+                  <div className="grid opts">
+                    {(trip.library[libCat] || []).map((o, i) => {
+                      const pid = libCat + "-" + i;
+                      return (
+                        <div className="pcard" key={pid}>
+                          <div className="pname">{o.name}</div>
+                          <div className="badges">
+                            {o.duration && <span className="badge">⏱ {o.duration}</span>}
+                            {o.effort && <span className={"badge eff-" + String(o.effort).toLowerCase()}>{o.effort}</span>}
+                            {o.bestTime && o.bestTime !== "Any" && <span className="badge">☀ Best: {o.bestTime}</span>}
+                          </div>
+                          <div className="pdesc">{o.desc}</div>
+                          {o.detail && <div className="pdetail">{o.detail}</div>}
+                          <div className="prow">
+                            {o.url && <LinkBtn href={o.url}>Website ↗</LinkBtn>}
+                            <LinkBtn href={mapsLink(o.mapsQuery || (o.name + " " + trip.destination))} primary>Take me there →</LinkBtn>
+                          </div>
+                          {pickerFor === pid ? (
+                            <div className="slotpick">
+                              <span>Slot into {fmtDate(day.date)}:</span>
+                              {["Morning", "Afternoon", "Evening"].map((sl) => (
+                                <button key={sl} className="ghost sm" onClick={() => addToDay(o, sl)}>{sl}</button>
+                              ))}
+                              <button className="ghost sm" onClick={() => setPickerFor(null)}>✕</button>
+                            </div>
+                          ) : (
+                            <button className="addbtn" onClick={() => setPickerFor(pid)}>+ Add to this day</button>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </section>
+
+              <section>
+                <h3 className="sec">Eat & drink</h3>
+                <div className="grid">
+                  {(det.eat || []).map((s, i) => <PlaceCard key={i} item={s} city={trip.destination} />)}
+                </div>
+              </section>
+              <section>
+                <h3 className="sec">Shops & essentials</h3>
+                <div className="grid">
+                  {(det.shops || []).map((s, i) => <PlaceCard key={i} item={s} city={trip.destination} />)}
+                </div>
+              </section>
+              {det.tip && <div className="tipbox">💡 <strong>Insider tip:</strong> {det.tip}</div>}
+              {isToday && (
+                <button className="ghost" disabled={dayLoading} onClick={() => fetchDay(dayIdx, true)}>
+                  {dayLoading ? "Refreshing…" : "↻ Refresh today's plan & weather"}
+                </button>
+              )}
+            </React.Fragment>
+          )}
+        </main>
+
+        <footer className="foot">
+          <div className="vault">
+            <button className="vault-h" onClick={() => setVaultOpen(!vaultOpen)}>🎫 Booking Vault {vaultOpen ? "▴" : "▾"}</button>
+            {vaultOpen && (
+              <div className="vault-b">
+                {trip.form.travel && <div className="vrow"><span>Travel</span><strong>{trip.form.travel}</strong></div>}
+                {bookings.length === 0 && !trip.form.travel && <div className="vrow muted">No bookings saved for this trip.</div>}
+                {bookings.map((b) => <div className="vrow" key={b.id}><span>{b.label || "Booking"}</span><strong>{b.ref}</strong></div>)}
+              </div>
+            )}
+          </div>
+          {(trip.tips || []).length > 0 && (
+            <div className="tips">{trip.tips.map((t, i) => <div key={i} className="tipline">✦ {t}</div>)}</div>
+          )}
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <button className="ghost" onClick={startFresh}>Plan a new trip</button>
+            <button className="ghost sm" onClick={() => setScreen("key")}>⚙ API key</button>
+          </div>
+        </footer>
+      </div>
+    );
+  }
+
+  // ---------- render ----------
+  return (
+    <div className="app">
+      {screen === "loading" && <div className="center"><div className="spin" /></div>}
+      {screen === "key" && renderKey()}
+      {screen === "home" && renderHome()}
+      {screen === "dump" && renderDump()}
+      {screen === "wizard" && renderWizard()}
+      {screen === "building" && (
+        <div className="center building" style={{ background: THEME_GRADIENTS.night }}>
+          <div className="brand light">WAYFARER</div>
+          <div className="big-em"><em>{form.destination || "Your trip"}</em></div>
+          <div className="spin" />
+          <div className="bmsg">{BUILD_MESSAGES[buildMsg]}</div>
+        </div>
+      )}
+      {screen === "dash" && trip && renderDash()}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<Wayfarer />);
+</script>
+</body>
+</html>
